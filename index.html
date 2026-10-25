@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Praveen AI Video Studio</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#0b1020;color:#fff;font-family:Arial,sans-serif}
+header{padding:22px;background:#121a30;border-bottom:1px solid #273450}
+header h1{margin:0;color:#70e1ff;font-size:25px}
+header p{color:#bac7dc;margin-bottom:0}
+main{max-width:900px;margin:25px auto;padding:15px}
+.card{background:#151e33;border:1px solid #293956;padding:22px;border-radius:16px;margin-bottom:20px}
+label{display:block;margin:16px 0 8px;font-weight:bold}
+textarea,select,input{width:100%;padding:13px;border-radius:9px;border:1px solid #394b68;background:#0c1426;color:white;font-size:15px}
+textarea{min-height:130px;resize:vertical}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:15px}
+button{border:0;border-radius:10px;padding:13px 18px;font-size:16px;font-weight:bold;cursor:pointer}
+.primary{width:100%;margin-top:18px;background:linear-gradient(90deg,#00c6ff,#7b61ff);color:white}
+.secondary{background:#293956;color:white;margin:6px 4px 0 0}
+#status{margin-top:15px;color:#70e1ff;line-height:1.7}
+#result{margin-top:15px}
+video{width:100%;max-height:450px;background:#000;border-radius:10px}
+.note{color:#bdc9dc;font-size:13px;line-height:1.6}
+footer{text-align:center;padding:20px;color:#9ba9c2}
+@media(max-width:600px){.row{grid-template-columns:1fr}header h1{font-size:21px}}
+</style>
+</head>
+<body>
+<header>
+<h1>🎬 PRAVEEN AI VIDEO STUDIO</h1>
+<p>हिंदी टेक्स्ट से वीडियो बनाने का तुम्हारा अपना स्टूडियो</p>
+</header>
+
+<main>
+<section class="card">
+<h2>✨ अपना वीडियो बनाओ</h2>
+<label for="prompt">वीडियो के बारे में हिंदी में लिखो</label>
+<textarea id="prompt" placeholder="उदाहरण: भगवान शिव की एक रहस्यमयी 3D कहानी बनाओ। हिंदी आवाज, सिनेमैटिक दृश्य और बैकग्राउंड म्यूजिक चाहिए।"></textarea>
+
+<div class="row">
+<div>
+<label for="duration">वीडियो की अवधि</label>
+<select id="duration">
+<option value="15">15 सेकंड</option>
+<option value="30" selected>30 सेकंड</option>
+<option value="60">1 मिनट</option>
+<option value="180">3 मिनट</option>
+<option value="600">10 मिनट</option>
+</select>
+</div>
+<div>
+<label for="ratio">वीडियो का आकार</label>
+<select id="ratio">
+<option value="9:16">YouTube Shorts (9:16)</option>
+<option value="16:9">YouTube वीडियो (16:9)</option>
+<option value="1:1">Square (1:1)</option>
+</select>
+</div>
+<div>
+<label for="style">वीडियो स्टाइल</label>
+<select id="style">
+<option>3D Animation</option>
+<option>Cinematic Realistic</option>
+<option>Cartoon Animation</option>
+<option>Mythology</option>
+<option>Educational</option>
+<option>Nature</option>
+<option>Anime</option>
+</select>
+</div>
+<div>
+<label for="quality">एक्सपोर्ट क्वालिटी</label>
+<select id="quality">
+<option value="720">720p HD</option>
+<option value="1080" selected>1080p Full HD</option>
+<option value="2160">4K (2160p)</option>
+</select>
+</div>
+</div>
+
+<label for="voice">वॉइसओवर</label>
+<select id="voice">
+<option value="hi-IN">हिंदी आवाज</option>
+<option value="en-US">English voice</option>
+<option value="none">बिना आवाज</option>
+</select>
+
+<button class="primary" onclick="prepareVideo()">🚀 वीडियो बनाने की तैयारी करो</button>
+<div id="status" role="status" aria-live="polite"></div>
+<div id="result"></div>
+<p class="note">ध्यान दें: यह शुरुआती इंटरफेस है। असली AI वीडियो जनरेशन के लिए वीडियो मॉडल या ऑनलाइन API जोड़ना होगा। केवल 4K विकल्प चुनने से वास्तविक 4K AI वीडियो अपने आप नहीं बनेगा।</p>
+</section>
+
+<section class="card">
+<h3>🎙️ हिंदी वॉइस टेस्ट</h3>
+<p class="note">यह सुविधा तुम्हारे ब्राउज़र में उपलब्ध हिंदी आवाज का इस्तेमाल करती है।</p>
+<button class="secondary" onclick="speakText()">🔊 टेक्स्ट सुनो</button>
+<button class="secondary" onclick="stopSpeech()">⏹️ आवाज बंद करो</button>
+</section>
+
+<section class="card">
+<h3>📁 अपनी वीडियो फाइल जोड़ो</h3>
+<label for="videoFile">कंप्यूटर से वीडियो चुनो</label>
+<input id="videoFile" type="file" accept="video/*">
+<div id="localPreview"></div>
+</section>
+</main>
+
+<footer>PRAVEEN AI VIDEO STUDIO · Personal Video Workspace</footer>
+
+<script>
+function prepareVideo(){
+ const prompt=document.getElementById('prompt').value.trim();
+ const status=document.getElementById('status');
+ const result=document.getElementById('result');
+ if(!prompt){
+   status.textContent='पहले हिंदी में लिखो कि तुम्हें कैसा वीडियो चाहिए।';
+   return;
+ }
+ const data={
+  prompt,
+  duration:document.getElementById('duration').value,
+  ratio:document.getElementById('ratio').value,
+  style:document.getElementById('style').value,
+  quality:document.getElementById('quality').value,
+  voice:document.getElementById('voice').value
+ };
+ const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+ const url=URL.createObjectURL(blob);
+ result.innerHTML='';
+ const link=document.createElement('a');
+ link.href=url;
+ link.download='praveen-video-project.json';
+ link.textContent='📥 वीडियो प्रोजेक्ट की सेटिंग डाउनलोड करो';
+ link.style='display:inline-block;margin-top:12px;color:#70e1ff';
+ result.appendChild(link);
+ status.textContent='प्रोजेक्ट की सेटिंग तैयार है। अभी असली वीडियो बनाने वाला AI इंजन कनेक्ट नहीं है।';
+}
+function speakText(){
+ const text=document.getElementById('prompt').value.trim();
+ if(!text){document.getElementById('status').textContent='पहले टेक्स्ट लिखो।';return}
+ if(!('speechSynthesis' in window)){document.getElementById('status').textContent='इस ब्राउज़र में वॉइस सुविधा उपलब्ध नहीं है।';return}
+ speechSynthesis.cancel();
+ const utterance=new SpeechSynthesisUtterance(text);
+ utterance.lang=document.getElementById('voice').value==='en-US'?'en-US':'hi-IN';
+ speechSynthesis.speak(utterance);
+}
+function stopSpeech(){if('speechSynthesis' in window)speechSynthesis.cancel()}
+document.getElementById('videoFile').addEventListener('change',function(){
+ const file=this.files[0];
+ if(!file)return;
+ const url=URL.createObjectURL(file);
+ document.getElementById('localPreview').innerHTML='';
+ const video=document.createElement('video');
+ video.controls=true;
+ video.src=url;
+ video.style='margin-top:12px';
+ document.getElementById('localPreview').appendChild(video);
+});
+</script>
+</body>
+</html>
